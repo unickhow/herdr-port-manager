@@ -62,15 +62,24 @@ browser) and **Stop sharing**. Clicking the link opens it too.
 
 ## Install notes for Herdr's agent
 
-1. Copy `mods/port-manager/` into `~/.config/herdr-app/mods/port-manager/`. Herdr docks it on the right by itself
-   the first time it sees `mod.json`. In a layout that ignores `place`, open it with
+1. Copy `mods/port-manager/` into `~/.config/herdr-app/mods/port-manager/`. Herdr initially docks it
+   on the right according to `mod.json`. Inspect the active layout and its toolbar before finishing:
+   if it already has a shared side panel for Files, Changes or Usage, put a `port-manager` block
+   inside that panel's stack and remove the extra automatically docked block. Follow the existing
+   toolbar's panel-button logic: select this stack child and show the panel, or hide the panel
+   when its active button is clicked again. Include `port-manager` in any list used to restore
+   the panel per space. Use a personal layout and toolbar clone when the originals are shipped.
+   In a layout without a shared panel, keep the right-side block and provide a toggle targeting
+   its actual block ID. For a pane-based layout, open it with
    `herdr-app do pane.split --direction right --mod port-manager`.
 2. Requires `python3` (the macOS one is fine). Nothing else is needed for the panel itself.
 3. **Do not install the sharing tools for the user.** Tell them which of `cloudflared` and `devtunnel`
    are missing and how to install them (`brew install cloudflared`, `brew install --cask devtunnel`),
    and install only if they ask. The mod never installs anything.
-4. Optional: if the user's layout has a top bar with panel buttons, offer to add a "Port Manager" button
-   (it can use `port-manager.svg` and `layout.toggle` on the block that holds this mod). Ask first; it edits their layout.
+4. For a toolbar button, use `mods/port-manager/port-manager.svg` and the label "Port Manager".
+   When replacing an older install, update any old button's mod name, icon path and target;
+   do not leave a button that still targets a removed block. Verify opening, closing and switching
+   between the existing panels, and run `herdr-app check` on every changed mod.
 5. Remove with: delete `~/.config/herdr-app/mods/port-manager/`, stop any shares (**Stop sharing**), and
    optionally delete `~/.cache/herdr-port-manager/`.
 
