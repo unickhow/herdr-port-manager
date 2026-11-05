@@ -1,11 +1,11 @@
-# Herdr Ports
+# Herdr Port Manager
 
 A side panel for the [Herdr](https://herdr.dev) app that lists every port your computer is
 listening on, shows which process holds it (name, pid, folder, command line), and lets you stop one
 process or several at once, politely (Stop) or not (Force kill). It can also share a port with your
 phone or another computer, with one click and a QR code.
 
-![Ports](preview.png)
+![Port Manager](preview.png)
 
 ## Install
 
@@ -15,7 +15,7 @@ In the Herdr app, ask its agent:
 Read ~/.config/herdr-app/AGENTS.md, then add this mod: https://github.com/unickhow/herdr-port-manager
 ```
 
-The agent copies `mods/ports/` into your Herdr folder and docks it on the right. Or clone the repo
+The agent copies `mods/port-manager/` into your Herdr folder and docks it on the right. Or clone the repo
 and point the agent at the local folder:
 
 ```sh
@@ -28,7 +28,7 @@ Read ~/.config/herdr-app/AGENTS.md, then add the mod in the folder you cloned it
 
 Requires `python3` (the macOS one is fine). Details for the agent are in [RECIPE.md](RECIPE.md).
 
-To remove it, delete `~/.config/herdr-app/mods/ports/`, stop any shares first, and optionally delete
+To remove it, delete `~/.config/herdr-app/mods/port-manager/`, stop any shares first, and optionally delete
 `~/.cache/herdr-port-manager/`.
 
 ## Using it
@@ -88,13 +88,13 @@ Both are **optional** and are never installed for you: if one is missing the pan
 ## Files
 
 ```
-RECIPE.md              what the mod looks like and how it works (the brief Herdr's agent builds from)
-preview.png            screenshot
-mods/ports/main.js     the panel
-mods/ports/ports.py    lists ports, stops processes, runs tunnels (stdlib Python)
-mods/ports/qr.py       QR code encoder for the share link (stdlib Python)
-mods/ports/mod.json    where it docks
-mods/ports/ports.svg   icon for an optional toolbar button
+RECIPE.md                           what the mod looks like and how it works (the brief Herdr's agent builds from)
+preview.png                         screenshot
+mods/port-manager/main.js           the panel
+mods/port-manager/port-manager.py   lists ports, stops processes, runs tunnels (stdlib Python)
+mods/port-manager/qr.py             QR code encoder for the share link (stdlib Python)
+mods/port-manager/mod.json          where it docks
+mods/port-manager/port-manager.svg  icon for an optional toolbar button
 ```
 
 ## License

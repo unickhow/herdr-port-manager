@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Lists the ports this computer is listening on, and who holds them. Can also stop a process.
 
-  ports.py list
-  ports.py kill TERM|KILL PID:PORT [PID:PORT ...]
-  ports.py tunnel start cloudflared|devtunnel PORT
-  ports.py tunnel stop cloudflared|devtunnel PORT
-  ports.py tunnel login devtunnel
+  port-manager.py list
+  port-manager.py kill TERM|KILL PID:PORT [PID:PORT ...]
+  port-manager.py tunnel start cloudflared|devtunnel PORT
+  port-manager.py tunnel stop cloudflared|devtunnel PORT
+  port-manager.py tunnel login devtunnel
 
 list prints one JSON object. kill re-reads the port table first and only signals a pid that
 still holds the port it was shown with, so a recycled pid is never hit. It refuses processes

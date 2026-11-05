@@ -2,11 +2,11 @@ import { View, div } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { exec, appHome, theme } from "herdr";
 
-// Ports panel: lists what is listening on this computer, who holds it, and stops it on request.
-// Everything goes through ports.py; nothing leaves this machine.
+// Port Manager panel: lists what is listening on this computer, who holds it, and stops it on request.
+// Everything goes through port-manager.py; nothing leaves this machine.
 
 const REFRESH_MS = 10000;
-const script = () => `${appHome()}/mods/ports/ports.py`;
+const script = () => `${appHome()}/mods/port-manager/port-manager.py`;
 
 // Optional ways to share a port. The panel never installs them: it only checks they exist.
 const SHARE = [
@@ -21,7 +21,7 @@ const sleep = (cx, ms) => new Promise((ok) => cx.timer.after(ms, ok));
 
 const isSystem = (p) => /^\/(System|usr\/(libexec|sbin)|sbin)\b/.test(p.command || "");
 
-export default class Ports extends View {
+export default class PortManager extends View {
   init(_props, cx) {
     this.data = null;
     this.error = null;
@@ -61,7 +61,7 @@ export default class Ports extends View {
 
   async fetch() {
     const r = await exec("python3", [script(), "list"]);
-    if (r.code !== 0) throw new Error((r.stderr || "ports.py failed").trim().slice(0, 200));
+    if (r.code !== 0) throw new Error((r.stderr || "port-manager.py failed").trim().slice(0, 200));
     this.data = JSON.parse(r.stdout);
     const alive = new Set(this.data.processes.map((p) => p.pid));
     for (const pid of [...this.selected]) if (!alive.has(pid)) this.selected.delete(pid);
@@ -318,9 +318,9 @@ export default class Ports extends View {
     const t = theme();
     const rows = this.visible();
     const refresh = this.button(t, "refresh", this.loading ? "…" : "Refresh", { onClick: (_e, cx) => this.load(cx) });
-    return v_flex().id("ports-root").size_full().bg(t.surface)
+    return v_flex().id("port-manager-root").size_full().bg(t.surface)
       .child(h_flex().h(42).px(14).flex_none().items_center().gap(8).border_b(1).border_color(t.border)
-        .child(div().text_size(13).font_semibold().text_color(t.foreground).child("Ports"))
+        .child(div().text_size(13).font_semibold().text_color(t.foreground).child("Port Manager"))
         .child(div().flex_1().text_size(11).text_color(t.dim).child(this.data ? `${rows.length} ${this.query.trim() ? "shown" : "listening"}` : "Loading…"))
         .child(refresh))
       .child(h_flex().px(12).pt(10).flex_none()
@@ -330,7 +330,7 @@ export default class Ports extends View {
         .child(this.toggle(t, "t-sys", "System", this.showSystem, () => { this.showSystem = !this.showSystem; }))
         .child(div().flex_1())
         .child(div().text_size(10.5).text_color(t.dim).child("Updates every 10s")))
-      .child(v_flex().id("ports-list").flex_1().min_h(0).overflow_y_scrollbar().gap(8).px(12).pb(12)
+      .child(v_flex().id("port-manager-list").flex_1().min_h(0).overflow_y_scrollbar().gap(8).px(12).pb(12)
         .when(Boolean(this.error), (el) => el.child(div().p(10).rounded(8).border(1).border_color(t.ansi1).text_size(11.5).text_color(t.ansi1).child(`Couldn't read ports: ${this.error}`)))
         .children(this.orphans().map((tn) => v_flex().gap(4)
           .child(div().text_size(10.5).text_color(t.ansi3).child(`Still sharing :${tn.port}, but nothing is listening on it any more`))

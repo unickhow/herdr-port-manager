@@ -1,4 +1,4 @@
-# Ports
+# Port Manager
 
 A right-side panel that lists every port this computer is listening on, who holds it, and lets
 you stop one process or several at once. It can also share a port with other devices through a
@@ -6,7 +6,7 @@ tunnel, with one click.
 
 ## What you see
 
-- Header: "Ports", a count ("10 listening"), a Refresh button.
+- Header: "Port Manager", a count ("10 listening"), a Refresh button.
 - A search box. Type words to narrow the list; each word must match a port, name, pid, folder or
   command (`5173`, `:5173`, `my-app node`). The count then reads "N shown".
 - Two filter chips: **UDP** (off by default) and **System** (off by default, hides macOS daemons).
@@ -42,7 +42,7 @@ browser) and **Stop sharing**. Clicking the link opens it too.
 - Every stop asks first, inline in the bottom bar, naming the processes. Force kill adds a warning
   that unsaved work is lost; a macOS system process adds another.
 - Processes owned by another user show "other user" and have no checkbox or buttons.
-- Before signalling, `ports.py kill` re-reads the port table and only acts on a pid that still holds
+- Before signalling, `port-manager.py kill` re-reads the port table and only acts on a pid that still holds
   the port it was shown with, so a recycled pid is never hit.
 - Tunnels are started detached, so they keep running when the panel or Herdr is closed, until
   **Stop sharing**. If the shared port stops listening, the link stays visible in a "Still sharing"
@@ -51,27 +51,27 @@ browser) and **Stop sharing**. Clicking the link opens it too.
 
 ## Built from
 
-- `mods/ports/main.js`: the panel (`gpui-kit`, `gpui-base`, `herdr`: `exec`, `appHome`, `theme`).
-- `mods/ports/ports.py`: stdlib Python, run through `exec("python3", …)`.
+- `mods/port-manager/main.js`: the panel (`gpui-kit`, `gpui-base`, `herdr`: `exec`, `appHome`, `theme`).
+- `mods/port-manager/port-manager.py`: stdlib Python, run through `exec("python3", …)`.
   - `list`: JSON from `lsof` and `ps`, plus which sharing tools exist and the running tunnels.
   - `kill TERM|KILL PID:PORT …`: signal processes.
   - `tunnel start|stop cloudflared|devtunnel PORT`, `tunnel login devtunnel`.
-- `mods/ports/qr.py`: a small QR encoder (stdlib, byte mode, error correction M, up to about 210 characters).
-- `mods/ports/mod.json`: `{ "place": "right", "size": 380 }`.
-- `mods/ports/ports.svg`: an icon, only for a toolbar button (see below).
+- `mods/port-manager/qr.py`: a small QR encoder (stdlib, byte mode, error correction M, up to about 210 characters).
+- `mods/port-manager/mod.json`: `{ "place": "right", "size": 380 }`.
+- `mods/port-manager/port-manager.svg`: an icon, only for a toolbar button (see below).
 
 ## Install notes for Herdr's agent
 
-1. Copy `mods/ports/` into `~/.config/herdr-app/mods/ports/`. Herdr docks it on the right by itself
+1. Copy `mods/port-manager/` into `~/.config/herdr-app/mods/port-manager/`. Herdr docks it on the right by itself
    the first time it sees `mod.json`. In a layout that ignores `place`, open it with
-   `herdr-app do pane.split --direction right --mod ports`.
+   `herdr-app do pane.split --direction right --mod port-manager`.
 2. Requires `python3` (the macOS one is fine). Nothing else is needed for the panel itself.
 3. **Do not install the sharing tools for the user.** Tell them which of `cloudflared` and `devtunnel`
    are missing and how to install them (`brew install cloudflared`, `brew install --cask devtunnel`),
    and install only if they ask. The mod never installs anything.
-4. Optional: if the user's layout has a top bar with panel buttons, offer to add a "Ports" button
-   (it can use `ports.svg` and `layout.toggle` on the block that holds this mod). Ask first; it edits their layout.
-5. Remove with: delete `~/.config/herdr-app/mods/ports/`, stop any shares (**Stop sharing**), and
+4. Optional: if the user's layout has a top bar with panel buttons, offer to add a "Port Manager" button
+   (it can use `port-manager.svg` and `layout.toggle` on the block that holds this mod). Ask first; it edits their layout.
+5. Remove with: delete `~/.config/herdr-app/mods/port-manager/`, stop any shares (**Stop sharing**), and
    optionally delete `~/.cache/herdr-port-manager/`.
 
 ## Sharing details
