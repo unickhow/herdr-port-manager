@@ -31,6 +31,21 @@ Requires `python3` (the macOS one is fine). Details for the agent are in [RECIPE
 To remove it, delete `~/.config/herdr-app/mods/port-manager/`, stop any shares first, and optionally delete
 `~/.cache/herdr-port-manager/`.
 
+## Updating
+
+Herdr does not update mods you added: the folder in `~/.config/herdr-app/mods/port-manager/` is your
+copy and stays as it is until you replace it. To update:
+
+1. Optional: stop any shares first. Shares started by an older version keep running and the new
+   version still lists them (with a Stop button), but it cannot stop them for you on its own.
+2. Ask the Herdr agent to replace the mod with the new version, giving it the same GitHub link or
+   cloned folder as for the install, and tell it to **replace the existing `port-manager` folder**,
+   not add a second copy (its default is to rename rather than overwrite).
+3. Replace the whole folder, never single files: the panel and the script are versioned together.
+   If they get out of step the panel shows a "Mixed versions" warning at the top.
+
+Your settings and docking are kept. Shares and the state in `~/.cache/herdr-port-manager/` carry over.
+
 ## Using it
 
 - Type in the search box to filter by port, name, pid or folder. **UDP** and **System** show the
@@ -58,8 +73,19 @@ Both are **optional** and are never installed for you: if one is missing the pan
 **Copy**, **Open** and **Stop sharing**.
 
 - Dev Tunnels needs a one-time sign-in; the card shows a **Sign in** button when it is needed.
-- A tunnel keeps running when you close the panel or Herdr, until you press **Stop sharing**. If the
-  shared dev server stops, the link stays listed at the top as "Still sharing" so you can stop it.
+- A share is tied to the process you chose. It keeps running when you close the panel or Herdr,
+  until you press **Stop sharing** or that process has been gone (or stopped holding the port) for
+  about 15 seconds; then it stops on its own and the panel says "Stopped sharing :PORT: service
+  exited", with **Try again** and **Dismiss**.
+- Sharing is refused, with the reason, when nothing is listening on the port or the listener is no
+  longer the process you chose.
+- A share started by an older version of the mod is still listed and **Stop sharing** stops it (it
+  does not stop on its own). If the panel cannot tell whether a share is still running, it keeps it
+  listed with a warning instead of forgetting it. A share started by a newer version is shown at the
+  top with a note to update the mod; this version never stops or removes it.
+- If another panel or the command line restarted a share after you saw it, its **Stop sharing** and
+  **Dismiss** refuse with "this share was restarted since it was shown" instead of stopping the new
+  one, and the list reloads.
 - Some dev servers (Vite) reject unknown host names. Cloudflare works because the Host header is
   rewritten to `localhost`. With Dev Tunnels, allow `*.devtunnels.ms` in the server's allowed hosts if
   you see "Blocked request".
@@ -70,11 +96,23 @@ Both are **optional** and are never installed for you: if one is missing the pan
 - Sharing sends traffic through Cloudflare's or Microsoft's servers, and only starts when you press
   Start sharing. A Cloudflare link is public to anyone who has it: don't share a dev server with
   logged-in sessions or admin pages.
-- Only your own processes can be stopped. Before signalling, it checks the pid still holds the port you
-  were shown, so a reused pid is never hit. Tunnels are stopped the same careful way.
+- Only your own processes can be stopped. When you tick a card or press Stop / Force kill, the panel
+  remembers that process as you saw it (pid, port, start time), and exactly that is confirmed and
+  sent. If a refresh shows another process behind that pid, or it no longer holds that port, it is
+  deselected and the bar says so. Immediately before each signal, the pid is checked again for that
+  start time, owner and port; otherwise it is not signalled.
+- A tunnel is only signalled after checking that its pid is still the tunnel's supervisor (exact
+  command line and recorded start time), and it is forgotten only once it is gone; a tunnel that
+  will not stop stays listed with the reason. Starts and stops of shares never overlap; a second
+  one waits up to 10 seconds, then says another is in progress. A lock held by each tunnel's
+  supervisor for its whole life keeps two supervisors of this version from running for one share,
+  even when a start is interrupted.
+- Two limits remain: start times have one-second resolution, and a check and its signal are two
+  steps, so a tiny window between them remains.
 - Full command lines are shown; they can include tokens passed as arguments. They never leave your
   computer, but keep them out of screenshots.
-- Tunnel logs and state are in `~/.cache/herdr-port-manager/` (private to your user, trimmed at 256 KB).
+- Tunnel state and logs are in `~/.cache/herdr-port-manager/` (private to your user). Each log is
+  capped at about 30 KB by the tunnel's supervisor, whether or not the panel is open.
 
 ## Limitations
 
@@ -91,6 +129,7 @@ Both are **optional** and are never installed for you: if one is missing the pan
 RECIPE.md                           what the mod looks like and how it works (the brief Herdr's agent builds from)
 preview.png                         screenshot
 mods/port-manager/main.js           the panel
+mods/port-manager/pin.js            what the panel remembers of a process you picked (pure functions)
 mods/port-manager/port-manager.py   lists ports, stops processes, runs tunnels (stdlib Python)
 mods/port-manager/qr.py             QR code encoder for the share link (stdlib Python)
 mods/port-manager/mod.json          where it docks
